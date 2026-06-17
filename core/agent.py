@@ -10,13 +10,14 @@ MagicOrigin Agent - 精简版 Agent 核心循环
 """
 
 import asyncio
+import inspect
 import json
 import logging
 import os
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, get_type_hints
 
 # 跨平台路径处理
 from pathlib import Path
@@ -99,9 +100,19 @@ class MagicOriginAgent:
         """
         构建 OpenAI 格式的工具定义
         
-        从注册的 tools 生成
+        使用 inspect 从函数签名提取参数
         """
         definitions = []
+        
+        # Python 类型到 JSON Schema 类型的映射
+        type_map = {
+            str: "string",
+            int: "integer",
+            float: "number",
+            bool: "boolean",
+            list: "array",
+            dict: "object",
+        }
         
         for name, func in self.tools.items():
             # 从函数文档字符串提取描述
@@ -109,8 +120,27 @@ class MagicOriginAgent:
             desc_lines = [l.strip() for l in doc.strip().split('\n') if l.strip()]
             description = desc_lines[0] if desc_lines else "No description"
             
-            # 尝试从函数签名提取参数
-            # 简化版：假设工具有 args 参数
+            # 使用 inspect 提取函数签名
+            sig = inspect.signature(func)
+            properties = {}
+            required = []
+            
+            for param_name, param in sig.parameters.items():
+                if param_name == 'self':
+                    continue
+                
+                # 获取参数类型
+                param_type = "string"  # 默认
+                if param.annotation != inspect.Parameter.empty:
+                    param_type = type_map.get(param.annotation, "string")
+                
+                prop = {"type": param_type, "description": param_name}
+                properties[param_name] = prop
+                
+                # 没有默认值的参数是必填的
+                if param.default == inspect.Parameter.empty:
+                    required.append(param_name)
+            
             tool_def = {
                 "type": "function",
                 "function": {
@@ -118,13 +148,8 @@ class MagicOriginAgent:
                     "description": description,
                     "parameters": {
                         "type": "object",
-                        "properties": {
-                            "args": {
-                                "type": "string",
-                                "description": "JSON 格式的参数"
-                            }
-                        },
-                        "required": ["args"]
+                        "properties": properties,
+                        "required": required
                     }
                 }
             }
