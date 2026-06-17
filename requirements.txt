@@ -1,0 +1,14 @@
+# WorkBuddy 依赖
+# 精简版，只保留核心依赖
+
+# HTTP 客户端（调用 LLM API）
+httpx>=0.28.0
+
+# 可选：更丰富的终端 UI
+# rich>=14.0.0
+
+# 可选：语音输入
+# faster-whisper>=1.0.0
+
+# 可选：语音输出
+# edge-tts>=7.0.0
