@@ -38,7 +38,7 @@ class MagicOriginAgent:
     def __init__(
         self,
         api_key: str,
-        base_url: str = "https://api.openai.com/v1",
+        base_url: str = "https://api.deepseek.com",
         model: str = "gpt-4",
         tools: Optional[Dict[str, Callable]] = None,
         memory_dir: Optional[str] = None,

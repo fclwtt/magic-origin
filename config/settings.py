@@ -24,8 +24,8 @@ class MagicOriginConfig:
     
     # LLM 配置
     api_key: str = ""
-    base_url: str = "https://api.openai.com/v1"
-    model: str = "gpt-4"
+    base_url: str = "https://api.deepseek.com"
+    model: str = "deepseek-chat"
     
     # 行为配置
     max_iterations: int = 50
@@ -92,10 +92,14 @@ def load_config() -> MagicOriginConfig:
         config = MagicOriginConfig()
     
     # 环境变量覆盖（用于敏感信息如 API Key）
-    if os.environ.get('OPENAI_API_KEY'):
+    if os.environ.get('DEEPSEEK_API_KEY'):
+        config.api_key = os.environ['DEEPSEEK_API_KEY']
+    elif os.environ.get('OPENAI_API_KEY'):
         config.api_key = os.environ['OPENAI_API_KEY']
     
-    if os.environ.get('OPENAI_BASE_URL'):
+    if os.environ.get('DEEPSEEK_BASE_URL'):
+        config.base_url = os.environ['DEEPSEEK_BASE_URL']
+    elif os.environ.get('OPENAI_BASE_URL'):
         config.base_url = os.environ['OPENAI_BASE_URL']
     
     if os.environ.get('MAGIC_ORIGIN_MODEL'):
@@ -148,7 +152,7 @@ def setup_wizard() -> MagicOriginConfig:
     config = MagicOriginConfig()
     
     # API Key
-    print("请输入 OpenAI API Key（或其他兼容 API）")
+    print("请输入 DeepSeek API Key")
     print("提示：API Key 不会保存到文件，仅存储在环境变量中")
     api_key = input("API Key: ").strip()
     if api_key:
@@ -157,7 +161,7 @@ def setup_wizard() -> MagicOriginConfig:
         print("警告：未提供 API Key，部分功能可能无法使用")
     
     # Base URL
-    print("\nAPI Base URL（直接回车使用默认 OpenAI）")
+    print("\nAPI Base URL（直接回车使用默认 DeepSeek）")
     base_url = input(f"Base URL [{config.base_url}]: ").strip()
     if base_url:
         config.base_url = base_url
