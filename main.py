@@ -62,12 +62,37 @@ def register_default_tools(agent: MagicOriginAgent):
         else:
             return f"错误: {result['error']}"
     
+    # 记忆工具
+    def save_memory(key: str, content: str):
+        """保存记忆到持久化存储。key 是记忆名称，content 是记忆内容。用于记住用户偏好、重要信息等。"""
+        agent.save_memory(key, content)
+        return f"记忆 '{key}' 已保存"
+    
+    def load_memory(key: str):
+        """加载已保存的记忆。key 是记忆名称。"""
+        content = agent.load_memory(key)
+        if content:
+            return content
+        else:
+            return f"记忆 '{key}' 不存在"
+    
+    def list_memories():
+        """列出所有已保存的记忆名称"""
+        memories = agent.list_memories()
+        if memories:
+            return '\n'.join(memories)
+        else:
+            return "(暂无记忆)"
+    
     # 注册工具
     agent.tools = {
         'terminal': terminal,
         'read': read,
         'write': write,
         'ls': ls,
+        'save_memory': save_memory,
+        'load_memory': load_memory,
+        'list_memories': list_memories,
     }
     
     # 重新构建工具定义
