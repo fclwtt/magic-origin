@@ -1,4 +1,4 @@
-# WorkBuddy 依赖
+# MagicOrigin 依赖
 # 精简版，只保留核心依赖
 
 # HTTP 客户端（调用 LLM API）

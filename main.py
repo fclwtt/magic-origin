@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-WorkBuddy - 智能 AI 助手
+MagicOrigin - 智能 AI 助手
 
 从 Hermes Agent 精简而来的跨平台 AI 助手
 """
@@ -12,7 +12,7 @@ from pathlib import Path
 # 添加项目根目录到路径
 sys.path.insert(0, str(Path(__file__).parent))
 
-from core.agent import WorkBuddyAgent
+from core.agent import MagicOriginAgent
 from config.settings import load_config, setup_wizard
 from tools.terminal import run_command
 from tools.file_ops import read_file, write_file, list_files
@@ -27,7 +27,7 @@ def setup_logging():
     )
 
 
-def register_default_tools(agent: WorkBuddyAgent):
+def register_default_tools(agent: MagicOriginAgent):
     """注册默认工具"""
     
     def terminal(command: str, timeout: int = 30):
@@ -80,7 +80,7 @@ def main():
     logger = logging.getLogger(__name__)
     
     print("=" * 50)
-    print("🤖 WorkBuddy - 智能 AI 助手")
+    print("🤖 MagicOrigin - 智能 AI 助手")
     print("=" * 50)
     print()
     
@@ -100,7 +100,7 @@ def main():
     
     # 创建 Agent
     try:
-        agent = WorkBuddyAgent(
+        agent = MagicOriginAgent(
             api_key=config.api_key,
             base_url=config.base_url,
             model=config.model,

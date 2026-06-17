@@ -1,4 +1,4 @@
-# WorkBuddy 🤖
+# MagicOrigin 🤖
 
 从 Hermes Agent 精简而来的跨平台 AI 助手。
 
@@ -12,7 +12,7 @@
 ## 架构
 
 ```
-workbuddy/
+magic-origin/
 ├── core/
 │   └── agent.py          # Agent 核心循环
 ├── tools/
@@ -55,14 +55,14 @@ python main.py
 pip install pyinstaller
 
 # 打包
-pyinstaller --onefile --name workbuddy main.py
+pyinstaller --onefile --name magic-origin main.py
 
 # 生成的 exe 在 dist/ 目录
 ```
 
 ## 与 Hermes 的对比
 
-| 特性 | Hermes | WorkBuddy |
+| 特性 | Hermes | MagicOrigin |
 |------|--------|-----------|
 | 代码量 | 20000+ 行 | ~1000 行 |
 | 依赖 | 50+ 包 | 1 个核心包 |

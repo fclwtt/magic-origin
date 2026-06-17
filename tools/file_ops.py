@@ -219,12 +219,12 @@ if __name__ == "__main__":
     print("=" * 40)
     
     # 测试写入
-    test_content = "Hello WorkBuddy!\n这是一个测试文件。"
-    result = write_file("./test_workbuddy.txt", test_content)
+    test_content = "Hello MagicOrigin!\n这是一个测试文件。"
+    result = write_file("./test_magic-origin.txt", test_content)
     print(f"\n写入文件: {result['success']}")
     
     # 测试读取
-    result = read_file("./test_workbuddy.txt")
+    result = read_file("./test_magic-origin.txt")
     print(f"读取文件: {result['success']}")
     print(f"内容: {result['content']}")
     
@@ -234,5 +234,5 @@ if __name__ == "__main__":
     print(f"文件列表: {result['files']}")
     
     # 清理测试文件
-    Path("./test_workbuddy.txt").unlink(missing_ok=True)
+    Path("./test_magic-origin.txt").unlink(missing_ok=True)
     print("\n测试完成，已清理")

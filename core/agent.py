@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-WorkBuddy Agent - 精简版 Agent 核心循环
+MagicOrigin Agent - 精简版 Agent 核心循环
 
 从 Hermes run_agent.py 精简而来，保留核心功能：
 - LLM 对话循环
@@ -24,7 +24,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
-class WorkBuddyAgent:
+class MagicOriginAgent:
     """
     精简版 AI Agent
     
@@ -68,9 +68,9 @@ class WorkBuddyAgent:
         if memory_dir:
             self.memory_dir = Path(memory_dir)
         else:
-            # 默认：用户目录下的 .workbuddy/memory
+            # 默认：用户目录下的 .magic-origin/memory
             home = Path.home()
-            self.memory_dir = home / ".workbuddy" / "memory"
+            self.memory_dir = home / ".magic-origin" / "memory"
         
         self.memory_dir.mkdir(parents=True, exist_ok=True)
         
@@ -80,11 +80,11 @@ class WorkBuddyAgent:
         # 系统提示词
         self.system_prompt = self._build_system_prompt()
         
-        logger.info(f"WorkBuddy Agent 初始化完成，模型: {model}, 记忆目录: {self.memory_dir}")
+        logger.info(f"MagicOrigin Agent 初始化完成，模型: {model}, 记忆目录: {self.memory_dir}")
     
     def _build_system_prompt(self) -> str:
         """构建系统提示词"""
-        return """你是 WorkBuddy，一个智能 AI 助手。
+        return """你是 MagicOrigin，一个智能 AI 助手。
 
 你可以：
 1. 回答用户问题
@@ -306,13 +306,13 @@ if __name__ == "__main__":
         sys.exit(1)
     
     # 创建 Agent
-    agent = WorkBuddyAgent(
+    agent = MagicOriginAgent(
         api_key=api_key,
         model="gpt-4"
     )
     
     # 简单对话测试
-    print("WorkBuddy Agent 测试")
+    print("MagicOrigin Agent 测试")
     print("=" * 40)
     
     while True:

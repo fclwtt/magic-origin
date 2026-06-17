@@ -99,7 +99,7 @@ if __name__ == "__main__":
     
     # 测试命令
     test_commands = [
-        "echo Hello WorkBuddy",
+        "echo Hello MagicOrigin",
         "date" if platform.system() != "Windows" else "time /t",
         "dir" if platform.system() == "Windows" else "ls -la"
     ]

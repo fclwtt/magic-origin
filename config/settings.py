@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class WorkBuddyConfig:
-    """WorkBuddy 配置"""
+class MagicOriginConfig:
+    """MagicOrigin 配置"""
     
     # LLM 配置
     api_key: str = ""
@@ -43,22 +43,22 @@ class WorkBuddyConfig:
         return asdict(self)
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'WorkBuddyConfig':
+    def from_dict(cls, data: Dict[str, Any]) -> 'MagicOriginConfig':
         """从字典创建"""
         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
 
 
 def get_config_dir() -> Path:
     """获取配置目录（跨平台）"""
-    # Windows: %APPDATA%\WorkBuddy
-    # Mac/Linux: ~/.config/workbuddy
+    # Windows: %APPDATA%\MagicOrigin
+    # Mac/Linux: ~/.config/magic-origin
     
     if os.name == 'nt':  # Windows
         base = Path(os.environ.get('APPDATA', Path.home() / 'AppData' / 'Roaming'))
     else:
         base = Path.home() / '.config'
     
-    config_dir = base / 'workbuddy'
+    config_dir = base / 'magic-origin'
     config_dir.mkdir(parents=True, exist_ok=True)
     return config_dir
 
@@ -68,7 +68,7 @@ def get_config_path() -> Path:
     return get_config_dir() / 'config.json'
 
 
-def load_config() -> WorkBuddyConfig:
+def load_config() -> MagicOriginConfig:
     """
     加载配置
     
@@ -83,13 +83,13 @@ def load_config() -> WorkBuddyConfig:
     if config_path.exists():
         try:
             data = json.loads(config_path.read_text(encoding='utf-8'))
-            config = WorkBuddyConfig.from_dict(data)
+            config = MagicOriginConfig.from_dict(data)
             logger.info(f"配置已加载: {config_path}")
         except Exception as e:
             logger.warning(f"加载配置失败: {e}，使用默认配置")
-            config = WorkBuddyConfig()
+            config = MagicOriginConfig()
     else:
-        config = WorkBuddyConfig()
+        config = MagicOriginConfig()
     
     # 环境变量覆盖（用于敏感信息如 API Key）
     if os.environ.get('OPENAI_API_KEY'):
@@ -98,17 +98,17 @@ def load_config() -> WorkBuddyConfig:
     if os.environ.get('OPENAI_BASE_URL'):
         config.base_url = os.environ['OPENAI_BASE_URL']
     
-    if os.environ.get('WORKBUDDY_MODEL'):
-        config.model = os.environ['WORKBUDDY_MODEL']
+    if os.environ.get('MAGIC_ORIGIN_MODEL'):
+        config.model = os.environ['MAGIC_ORIGIN_MODEL']
     
     # 设置默认记忆目录
     if not config.memory_dir:
-        config.memory_dir = str(Path.home() / '.workbuddy' / 'memory')
+        config.memory_dir = str(Path.home() / '.magic-origin' / 'memory')
     
     return config
 
 
-def save_config(config: WorkBuddyConfig) -> bool:
+def save_config(config: MagicOriginConfig) -> bool:
     """
     保存配置
     
@@ -134,18 +134,18 @@ def save_config(config: WorkBuddyConfig) -> bool:
         return False
 
 
-def setup_wizard() -> WorkBuddyConfig:
+def setup_wizard() -> MagicOriginConfig:
     """
     首次运行设置向导
     
     引导用户配置 API Key 等
     """
     print("=" * 50)
-    print("WorkBuddy 首次设置")
+    print("MagicOrigin 首次设置")
     print("=" * 50)
     print()
     
-    config = WorkBuddyConfig()
+    config = MagicOriginConfig()
     
     # API Key
     print("请输入 OpenAI API Key（或其他兼容 API）")

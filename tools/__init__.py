@@ -1,4 +1,4 @@
-# WorkBuddy Tools
+# MagicOrigin Tools
 """
 工具模块 - 跨平台兼容
 """
