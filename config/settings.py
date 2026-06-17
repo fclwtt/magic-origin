@@ -23,7 +23,7 @@ class MagicOriginConfig:
     """MagicOrigin 配置"""
     
     # LLM 配置
-    api_key: str = "sk-17b02f058d8c4570888166653ac6db30"
+    api_key: str = ""
     base_url: str = "https://api.deepseek.com"
     model: str = "deepseek-v4-flash"
     
