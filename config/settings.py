@@ -15,6 +15,12 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 from dataclasses import dataclass, asdict
 
+# 导入 model-provider 组件
+try:
+    from components.model_provider import ModelProviderManager
+except ImportError:
+    ModelProviderManager = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +31,10 @@ class MagicOriginConfig:
     # LLM 配置
     api_key: str = ""
     base_url: str = "https://api.deepseek.com"
-    model: str = "deepseek-v4-flash"
+    model: str = "deepseek-chat"
+    
+    # Provider 配置（新增）
+    provider_id: str = "deepseek"
     
     # 行为配置
     max_iterations: int = 50
@@ -37,6 +46,13 @@ class MagicOriginConfig:
     
     # 工具配置
     tools_enabled: bool = True
+    
+    # 自定义 Provider 列表
+    custom_providers: Dict[str, Any] = None
+    
+    def __post_init__(self):
+        if self.custom_providers is None:
+            self.custom_providers = {}
     
     def to_dict(self) -> Dict[str, Any]:
         """转为字典"""
@@ -151,26 +167,64 @@ def setup_wizard() -> MagicOriginConfig:
     
     config = MagicOriginConfig()
     
-    # API Key
-    print("请输入 DeepSeek API Key")
-    print("提示：API Key 不会保存到文件，仅存储在环境变量中")
-    api_key = input("API Key: ").strip()
-    if api_key:
-        config.api_key = api_key
+    # 选择 Provider 类型
+    print("选择 LLM Provider:")
+    print("  1. DeepSeek（默认）")
+    print("  2. OpenAI")
+    print("  3. 本地 llama.cpp")
+    print("  4. 本地 Ollama")
+    print("  5. 自定义")
+    
+    choice = input("选择 [1]: ").strip() or "1"
+    
+    if choice == "1":
+        config.provider_id = "deepseek"
+        config.base_url = "https://api.deepseek.com"
+        config.model = "deepseek-chat"
+    elif choice == "2":
+        config.provider_id = "openai"
+        config.base_url = "https://api.openai.com/v1"
+        config.model = "gpt-4"
+    elif choice == "3":
+        config.provider_id = "local-llama"
+        config.base_url = "http://localhost:8080/v1"
+        config.model = ""  # 自动检测
+    elif choice == "4":
+        config.provider_id = "local-ollama"
+        config.base_url = "http://localhost:11434/v1"
+        config.model = ""  # 自动检测
     else:
-        print("警告：未提供 API Key，部分功能可能无法使用")
+        config.provider_id = "custom"
+        config.base_url = input("Base URL: ").strip()
+        config.model = input("Model: ").strip()
     
-    # Base URL
-    print("\nAPI Base URL（直接回车使用默认 DeepSeek）")
-    base_url = input(f"Base URL [{config.base_url}]: ").strip()
-    if base_url:
-        config.base_url = base_url
+    print()
     
-    # Model
-    print("\n模型名称（直接回车使用默认）")
-    model = input(f"Model [{config.model}]: ").strip()
-    if model:
-        config.model = model
+    # API Key（本地模型可跳过）
+    is_local = "localhost" in config.base_url or "127.0.0.1" in config.base_url
+    
+    if is_local:
+        print("本地 Provider，API Key 可选")
+        api_key = input("API Key（直接回车跳过）: ").strip()
+        if api_key:
+            config.api_key = api_key
+        else:
+            config.api_key = "no-key-required"
+    else:
+        print(f"请输入 {config.provider_id.upper()} API Key")
+        print("提示：API Key 不会保存到文件，仅存储在环境变量中")
+        api_key = input("API Key: ").strip()
+        if api_key:
+            config.api_key = api_key
+        else:
+            print("警告：未提供 API Key，部分功能可能无法使用")
+    
+    # Model（如果还没设置）
+    if not config.model:
+        print("\n模型名称（直接回车自动检测）")
+        model = input(f"Model: ").strip()
+        if model:
+            config.model = model
     
     # 保存配置
     save_config(config)
@@ -192,6 +246,7 @@ if __name__ == "__main__":
     # 加载配置
     config = load_config()
     print(f"\n当前配置:")
+    print(f"  Provider: {config.provider_id}")
     print(f"  Base URL: {config.base_url}")
     print(f"  Model: {config.model}")
     print(f"  API Key: {'*' * 8 if config.api_key else '(未设置)'}")

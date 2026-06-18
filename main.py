@@ -13,9 +13,17 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from core.agent import MagicOriginAgent
-from config.settings import load_config, setup_wizard
+from config.settings import load_config, save_config, setup_wizard, MagicOriginConfig
 from tools.terminal import run_command
 from tools.file_ops import read_file, write_file, list_files
+
+# 导入 model-provider 组件
+try:
+    from components.model_provider import ModelProviderManager
+    HAS_MODEL_PROVIDER = True
+except ImportError:
+    HAS_MODEL_PROVIDER = False
+    ModelProviderManager = None
 
 
 def setup_logging():
@@ -99,6 +107,97 @@ def register_default_tools(agent: MagicOriginAgent):
     agent.tool_definitions = agent._build_tool_definitions()
 
 
+def create_provider_manager(config: MagicOriginConfig) -> ModelProviderManager:
+    """从配置创建 ModelProviderManager"""
+    if not HAS_MODEL_PROVIDER:
+        return None
+    
+    manager = ModelProviderManager()
+    
+    # 添加自定义 Provider
+    for pid, pconfig in config.custom_providers.items():
+        manager.add_provider(
+            provider_id=pid,
+            name=pconfig.get("name", pid),
+            base_url=pconfig.get("base_url", ""),
+            api_key=pconfig.get("api_key", ""),
+            default_model=pconfig.get("default_model", ""),
+            requires_api_key=pconfig.get("requires_api_key", True),
+        )
+    
+    # 设置当前 Provider
+    manager.current_provider_id = config.provider_id
+    manager.current_model = config.model
+    
+    # 确保当前 Provider 的 API Key 已设置
+    current = manager.get_provider(config.provider_id)
+    if current and config.api_key:
+        current.api_key = config.api_key
+    
+    return manager
+
+
+def handle_model_command(args: str, agent: MagicOriginAgent, manager: ModelProviderManager, config: MagicOriginConfig):
+    """处理 /model 命令"""
+    if not args.strip():
+        # 显示当前模型和可用 Provider
+        current = manager.get_current_config()
+        print("\n📍 当前模型:")
+        print(f"  Provider: {current.get('provider_name', 'N/A')}")
+        print(f"  Model: {current.get('model', 'N/A')}")
+        print(f"  Base URL: {current.get('base_url', 'N/A')}")
+        print(f"  本地: {'是' if current.get('is_local') else '否'}")
+        
+        print("\n📋 可用 Provider:")
+        for p in manager.list_providers():
+            local_tag = " [本地]" if p["is_local"] else ""
+            current_tag = " ✓" if p["is_current"] else ""
+            print(f"  - {p['name']}{local_tag}{current_tag}")
+        
+        print("\n💡 用法: /model <模型名> [--provider <provider_id>]")
+        print("   例如: /model llama3 --provider local-llama")
+        return
+    
+    # 解析参数
+    parts = args.strip().split()
+    model = ""
+    provider_id = ""
+    
+    i = 0
+    while i < len(parts):
+        if parts[i] == "--provider" and i + 1 < len(parts):
+            provider_id = parts[i + 1]
+            i += 2
+        else:
+            model = parts[i]
+            i += 1
+    
+    # 切换模型
+    result = manager.switch_model(model, provider_id=provider_id)
+    
+    if result.success:
+        # 更新 Agent 配置
+        agent.api_key = result.api_key
+        agent.base_url = result.base_url
+        agent.model = result.model
+        
+        # 更新全局配置
+        config.provider_id = result.provider_id
+        config.model = result.model
+        config.base_url = result.base_url
+        config.api_key = result.api_key
+        
+        # 保存配置
+        save_config(config)
+        
+        auto_tag = " (自动检测)" if result.auto_detected else ""
+        print(f"\n✅ 已切换到: {result.model}{auto_tag}")
+        print(f"   Provider: {result.provider_id}")
+        print(f"   Base URL: {result.base_url}")
+    else:
+        print(f"\n❌ 切换失败: {result.error_message}")
+
+
 def main():
     """主入口"""
     setup_logging()
@@ -123,10 +222,13 @@ def main():
             print("请设置环境变量 OPENAI_API_KEY 或重新运行设置")
             sys.exit(1)
     
+    # 创建 Provider Manager
+    manager = create_provider_manager(config) if HAS_MODEL_PROVIDER else None
+    
     # 创建 Agent
     try:
         agent = MagicOriginAgent(
-            api_key=config.api_key,
+            api_key=***
             base_url=config.base_url,
             model=config.model,
             memory_dir=config.memory_dir,
@@ -146,6 +248,7 @@ def main():
     
     # 交互循环
     print("\n输入 'exit' 或 'quit' 退出")
+    print("输入 '/model' 查看/切换模型")
     print("-" * 50)
     
     while True:
@@ -174,6 +277,15 @@ def main():
                         print(f"  - {m}")
                 else:
                     print("\n暂无记忆")
+                continue
+            
+            # /model 命令
+            if user_input.startswith('/model'):
+                if manager:
+                    args = user_input[6:].strip()  # 去掉 "/model "
+                    handle_model_command(args, agent, manager, config)
+                else:
+                    print("\n⚠️ model-provider 组件未安装")
                 continue
             
             # 调用 Agent
