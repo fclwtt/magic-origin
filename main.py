@@ -17,7 +17,7 @@ from config.settings import load_config, save_config, setup_wizard, MagicOriginC
 from tools.terminal import run_command
 from tools.file_ops import read_file, write_file, list_files
 
-# 导入 model-provider 组件
+# 导入 model-provider 组件（可选）
 try:
     from components.model_provider import ModelProviderManager
     HAS_MODEL_PROVIDER = True
@@ -107,8 +107,8 @@ def register_default_tools(agent: MagicOriginAgent):
     agent.tool_definitions = agent._build_tool_definitions()
 
 
-def create_provider_manager(config: MagicOriginConfig) -> ModelProviderManager:
-    """从配置创建 ModelProviderManager"""
+def create_provider_manager(config: MagicOriginConfig):
+    """从配置创建 ModelProviderManager（如果组件可用）"""
     if not HAS_MODEL_PROVIDER:
         return None
     
@@ -137,7 +137,7 @@ def create_provider_manager(config: MagicOriginConfig) -> ModelProviderManager:
     return manager
 
 
-def handle_model_command(args: str, agent: MagicOriginAgent, manager: ModelProviderManager, config: MagicOriginConfig):
+def handle_model_command(args: str, agent: MagicOriginAgent, manager, config: MagicOriginConfig):
     """处理 /model 命令"""
     if not args.strip():
         # 显示当前模型和可用 Provider
@@ -222,7 +222,7 @@ def main():
             print("请设置环境变量 OPENAI_API_KEY 或重新运行设置")
             sys.exit(1)
     
-    # 创建 Provider Manager
+    # 创建 Provider Manager（如果组件可用）
     manager = create_provider_manager(config) if HAS_MODEL_PROVIDER else None
     
     # 创建 Agent

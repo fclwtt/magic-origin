@@ -1,25 +1,34 @@
 """
-Model Provider - 模型提供者管理组件
+Components - 可插拔组件模块
 
-提供：
-- Provider 注册表
-- 动态切换模型
-- 本地模型自动检测
-- API Key 智能处理
+组件是可选的功能模块，可以独立启用/禁用。
+
+可用组件：
+- model_provider: 模型提供者管理（多 Provider 支持、动态切换）
 """
 
-from .model_provider import (
-    ModelProviderManager,
-    ProviderConfig,
-    ModelSwitchResult,
-    BUILTIN_PROVIDERS,
-)
+# 组件注册表
+AVAILABLE_COMPONENTS = {
+    "model_provider": {
+        "name": "Model Provider",
+        "description": "模型提供者管理，支持多 Provider 和动态切换",
+        "module": "components.model_provider",
+        "required": False,
+    },
+}
 
-__all__ = [
-    "ModelProviderManager",
-    "ProviderConfig",
-    "ModelSwitchResult",
-    "BUILTIN_PROVIDERS",
-]
 
-__version__ = "0.1.0"
+def get_component(name: str):
+    """动态加载组件"""
+    if name not in AVAILABLE_COMPONENTS:
+        return None
+    
+    try:
+        import importlib
+        module = importlib.import_module(AVAILABLE_COMPONENTS[name]["module"])
+        return module
+    except ImportError as e:
+        return None
+
+
+__all__ = ["AVAILABLE_COMPONENTS", "get_component"]

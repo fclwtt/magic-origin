@@ -13,13 +13,7 @@ import os
 import logging
 from pathlib import Path
 from typing import Optional, Dict, Any
-from dataclasses import dataclass, asdict
-
-# 导入 model-provider 组件
-try:
-    from components.model_provider import ModelProviderManager
-except ImportError:
-    ModelProviderManager = None
+from dataclasses import dataclass, asdict, field
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +27,7 @@ class MagicOriginConfig:
     base_url: str = "https://api.deepseek.com"
     model: str = "deepseek-chat"
     
-    # Provider 配置（新增）
+    # Provider 配置
     provider_id: str = "deepseek"
     
     # 行为配置
@@ -48,11 +42,7 @@ class MagicOriginConfig:
     tools_enabled: bool = True
     
     # 自定义 Provider 列表
-    custom_providers: Dict[str, Any] = None
-    
-    def __post_init__(self):
-        if self.custom_providers is None:
-            self.custom_providers = {}
+    custom_providers: Dict[str, Any] = field(default_factory=dict)
     
     def to_dict(self) -> Dict[str, Any]:
         """转为字典"""
@@ -222,7 +212,7 @@ def setup_wizard() -> MagicOriginConfig:
     # Model（如果还没设置）
     if not config.model:
         print("\n模型名称（直接回车自动检测）")
-        model = input(f"Model: ").strip()
+        model = input("Model: ").strip()
         if model:
             config.model = model
     

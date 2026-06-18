@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
 """
-Model Provider - 模型提供者管理组件
+Model Provider Component - 模型提供者管理
 
 从 Hermes 精简而来，提供：
 - Provider 注册表（DeepSeek、OpenAI、本地 llama.cpp 等）
@@ -8,12 +7,14 @@ Model Provider - 模型提供者管理组件
 - 本地模型自动检测
 - API Key 智能处理（本地可跳过）
 
+这是一个可选组件，不安装时 MagicOrigin 仍可正常运行。
+
 用法：
-    from model_provider import ModelProviderManager
+    from components.model_provider import ModelProviderManager
     
     manager = ModelProviderManager()
     manager.add_provider("local", base_url="http://localhost:8080/v1")
-    manager.switch_model("llama3", provider="local")
+    result = manager.switch_model("llama3", provider="local")
 """
 
 import logging
@@ -158,7 +159,7 @@ class ModelProviderManager:
             id=provider_id,
             name=name,
             base_url=base_url.rstrip("/"),
-            api_key=api_key,
+            api_key=***
             default_model=default_model,
             requires_api_key=requires_api_key,
         )
@@ -261,7 +262,7 @@ class ModelProviderManager:
             provider_id=provider.id,
             model=self.current_model,
             base_url=provider.base_url,
-            api_key=effective_api_key,
+            api_key=effect…key,
             auto_detected=(not model),
         )
     
@@ -359,7 +360,7 @@ class ModelProviderManager:
                 provider_id=pid,
                 name=pconfig.get("name", pid),
                 base_url=pconfig.get("base_url", ""),
-                api_key=pconfig.get("api_key", ""),
+                api_key=pconfi…ey", ""),
                 default_model=pconfig.get("default_model", ""),
                 requires_api_key=pconfig.get("requires_api_key", True),
             )
@@ -392,45 +393,9 @@ class ModelProviderManager:
         }
 
 
-# ---------------------------------------------------------------------------
-# 命令行测试
-# ---------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    
-    print("Model Provider Manager 测试")
-    print("=" * 40)
-    
-    # 创建管理器
-    manager = ModelProviderManager()
-    
-    # 列出内置 Provider
-    print("\n内置 Provider:")
-    for p in manager.list_providers():
-        local_tag = " [本地]" if p["is_local"] else ""
-        print(f"  - {p['name']}{local_tag}: {p['base_url']}")
-    
-    # 添加自定义本地 Provider
-    manager.add_provider(
-        provider_id="my-llama",
-        name="My llama.cpp",
-        base_url="http://localhost:8080/v1",
-        requires_api_key=False,
-    )
-    
-    print("\n添加自定义 Provider 后:")
-    for p in manager.list_providers():
-        local_tag = " [本地]" if p["is_local"] else ""
-        current_tag = " [当前]" if p["is_current"] else ""
-        print(f"  - {p['name']}{local_tag}{current_tag}: {p['base_url']}")
-    
-    # 测试切换（会失败，因为没有本地服务）
-    print("\n测试切换到本地模型...")
-    result = manager.switch_model("llama3", provider_id="my-llama")
-    if result.success:
-        print(f"  成功: {result.model} @ {result.base_url}")
-    else:
-        print(f"  失败: {result.error_message}")
-    
-    print("\n测试完成")
+__all__ = [
+    "ModelProviderManager",
+    "ProviderConfig",
+    "ModelSwitchResult",
+    "BUILTIN_PROVIDERS",
+]
