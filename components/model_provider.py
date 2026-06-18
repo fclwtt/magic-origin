@@ -159,7 +159,7 @@ class ModelProviderManager:
             id=provider_id,
             name=name,
             base_url=base_url.rstrip("/"),
-            api_key=***
+            api_key=api_key,
             default_model=default_model,
             requires_api_key=requires_api_key,
         )
@@ -262,7 +262,7 @@ class ModelProviderManager:
             provider_id=provider.id,
             model=self.current_model,
             base_url=provider.base_url,
-            api_key=effect…key,
+            api_key=effective_api_key,
             auto_detected=(not model),
         )
     
@@ -360,7 +360,7 @@ class ModelProviderManager:
                 provider_id=pid,
                 name=pconfig.get("name", pid),
                 base_url=pconfig.get("base_url", ""),
-                api_key=pconfi…ey", ""),
+                api_key=pconfig.get("api_key", ""),
                 default_model=pconfig.get("default_model", ""),
                 requires_api_key=pconfig.get("requires_api_key", True),
             )

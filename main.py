@@ -228,7 +228,7 @@ def main():
     # 创建 Agent
     try:
         agent = MagicOriginAgent(
-            api_key=***
+            api_key=config.api_key,
             base_url=config.base_url,
             model=config.model,
             memory_dir=config.memory_dir,
